@@ -75,4 +75,41 @@ router.delete('/:candidateID' , jwtAuthMiddleware ,  async(req,res) => {
     }
 })
 
+
+router.post('/vote/:candidateID' , jwtAuthMiddleware , async(req,res) => {
+    //admin cannot vote
+    //voter can vote only once
+
+    candidateID = req.params.candidateID;
+    userID = req.user.id;
+
+    try {
+        
+        const candidate = await Candidate.findById(candidateID);
+        if(!candidate){
+            return res.status(404).json({message: "Candidate not found"});
+        }
+
+        const user = await User.findById(userID);
+        if(!user) return res.status(404).json({message: "User not found"});
+
+        if(user.isVoted) return res.status(400).json({message: "User has already voted"});
+
+        if(user.role === 'admin') return res.status(403).json({message: "Admin cannot vote"});
+
+        candidate.votes.push({user : userID});
+        candidate.voteCount ++;
+        await candidate.save();
+
+        user.isVoted = true;
+        await user.save();
+
+        res.status(200).json({message: "Vote cast successfully"});
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: "Internal server error"});
+    }
+})
+
 module.exports = router;

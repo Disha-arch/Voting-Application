@@ -29,7 +29,7 @@ router.post('/signup' , async (req,res) => {
 
 router.post('/login', async(req,res) => {
     try {
-        const{aadharCardNumber , password} = req.body;
+        const{aadharCardNumber} = req.body;
 
         const user = await User.findOne({aadharCardNumber: aadharCardNumber});
 
