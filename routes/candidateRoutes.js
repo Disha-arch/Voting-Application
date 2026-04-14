@@ -112,4 +112,24 @@ router.post('/vote/:candidateID' , jwtAuthMiddleware , async(req,res) => {
     }
 })
 
+router.get('/vote/count' , async(req,res) => {
+    try {
+        // find all candidates and sort them in descending order of vote count
+        const candidate = await Candidate.find().sort({voteCount: 'desc'});
+
+        const voteRecord = candidate.map((data) => {
+            return{
+                party : data.party,
+                count : data.voteCount
+            }
+        })
+        
+        return res.status(200).json(voteRecord);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: "Internal server error"});
+    }
+})
+
 module.exports = router;
